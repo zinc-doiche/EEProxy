@@ -1,6 +1,6 @@
 package zinc.doiche.service.user.repository
 
-import org.bukkit.entity.Player
+import com.velocitypowered.api.proxy.Player
 import zinc.doiche.database.repository.CachedKeyRepository
 import zinc.doiche.service.user.entity.QUser.user
 import zinc.doiche.service.user.entity.User

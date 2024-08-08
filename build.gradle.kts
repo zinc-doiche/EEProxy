@@ -88,7 +88,7 @@ tasks.create(name = "deploy") {
         ssh.run(delegateClosureOf<RunHandler> {
             session(server, delegateClosureOf<SessionHandler> {
                 val file = "$projectDir/build/libs/${project.name}-${project.version}-all.jar"
-                val directory = "/home/minecraft/${rootProject.name}/${project.name}/plugins"
+                val directory = "/home/minecraft/ExpandingExtensions/${project.name}/plugins"
 
                 put(
                     hashMapOf(
