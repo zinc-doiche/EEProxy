@@ -18,36 +18,41 @@ import zinc.doiche.service.Service
 import zinc.doiche.util.LoggerProvider
 import java.nio.file.Path
 
-@Plugin(id = "ee-proxy", name = "EEProxy", version = "alpha", authors = ["Doiche"])
+@Plugin(
+    id = "ee-proxy",
+    name = "EEProxy",
+    version = "alpha",
+    authors = ["Doiche"]
+)
 class EEProxy @Inject constructor(
     val proxyServer: ProxyServer,
 
     @DataDirectory
     val dataDirectory: Path,
 
-    logger: Logger,
+    val logger: Logger
 ) {
     companion object {
         internal lateinit var proxy: EEProxy
             private set
     }
 
-    val jedisPooled: JedisPooled
-    val entityManager: EntityManager
-    val jpaQueryFactory: JPAQueryFactory
-    private val services: MutableList<Service> = mutableListOf()
-
-    init {
-        LoggerProvider.init(logger)
-        jedisPooled = CachePoolFactory().create() ?: throw IllegalStateException("jedis pooled is null")
-        entityManager = DatabaseFactoryProvider.create()?.createEntityManager() ?: throw IllegalStateException("factory is null")
-        jpaQueryFactory = JPAQueryFactory(entityManager)
+    val jedisPooled: JedisPooled by lazy {
+        CachePoolFactory().create() ?: throw IllegalStateException("jedis pooled is null")
     }
+    val entityManager: EntityManager by lazy {
+        DatabaseFactoryProvider.create()?.createEntityManager() ?: throw IllegalStateException("factory is null")
+    }
+    val jpaQueryFactory: JPAQueryFactory by lazy {
+        JPAQueryFactory(entityManager)
+    }
+
+    private val services: MutableList<Service> = mutableListOf()
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
         proxy = this
-        proxyServer.eventManager.register(this, this)
+        LoggerProvider.init(logger)
 
         process()
         loadServices()
