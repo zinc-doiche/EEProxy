@@ -12,6 +12,9 @@ import org.slf4j.Logger
 import redis.clients.jedis.JedisPooled
 import zinc.doiche.database.CachePoolFactory
 import zinc.doiche.database.DatabaseFactoryProvider
+import zinc.doiche.lib.init.ClassLoader
+import zinc.doiche.lib.init.ProcessorFactory
+import zinc.doiche.service.Service
 import zinc.doiche.util.LoggerProvider
 import java.nio.file.Path
 
@@ -32,6 +35,7 @@ class EEProxy @Inject constructor(
     val jedisPooled: JedisPooled
     val entityManager: EntityManager
     val jpaQueryFactory: JPAQueryFactory
+    private val services: MutableList<Service> = mutableListOf()
 
     init {
         LoggerProvider.init(logger)
@@ -44,6 +48,31 @@ class EEProxy @Inject constructor(
     fun onProxyInitialization(event: ProxyInitializeEvent) {
         proxy = this
         proxyServer.eventManager.register(this, this)
+
+        process()
+        loadServices()
+    }
+
+    private fun process() {
+        ClassLoader()
+            .add(ProcessorFactory.translatable {
+                it.replace("<brace>", "[")
+                    .replace("</brace>", "]")
+                    .replace("<curlyBrace>", "{")
+                    .replace("</curlyBrace>", "}")
+            })
+            .add(ProcessorFactory.service())
+            .add(ProcessorFactory.listener(this, proxyServer.eventManager))
+            .add(ProcessorFactory.command(proxyServer.commandManager))
+            .process()
+    }
+
+    private fun loadServices() {
+        services.forEach(Service::onEnable)
+    }
+
+    fun register(vararg service: Service) {
+        services.addAll(service)
     }
 }
 
