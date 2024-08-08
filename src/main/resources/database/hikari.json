@@ -1,0 +1,6 @@
+{
+    "maximumPoolSize": 10,
+    "minimumIdle": 5,
+    "idleTimeout": 300000,
+    "connectionTimeout": 60000
+}

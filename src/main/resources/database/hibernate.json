@@ -1,0 +1,5 @@
+{
+    "showSQL": true,
+    "hbm2ddl": "create",
+    "isAutoCommit": false
+}
